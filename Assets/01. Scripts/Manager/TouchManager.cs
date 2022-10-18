@@ -57,7 +57,7 @@ public class TouchManager : Singleton<TouchManager>
     public void DropTile()
     {
         // 삭제 빔
-
+        GameManager.Instance.map.ClearSelectTile(linkTileList);
 
         // 초기화
         isTouch = false;
