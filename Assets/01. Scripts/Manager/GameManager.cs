@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
 {
-    public Map map { get; }
+    public Map map { get; } = new Map();
 
     public GameObject tilePrefab;
     private void Start()
     {
+        InitGame();
     }
 
     public void InitGame()

@@ -26,12 +26,12 @@ public class Map
 
     public void InitTile()
     {
-        int coinXPos = 0;
-        int coinYPos = 0;
-        int diffX = 0/*104*/;
-        int diffY = 0/*120*/;
-        int initCoinXPos = 0/*72*/;
-        int initCoinYPos = 0/*778*/;
+        float coinXPos = 0;
+        float coinYPos = 0;
+        float diffX = .7f;
+        float diffY = .7f;
+        float initCoinXPos = -2.1f;
+        float initCoinYPos = 1;
 
         Tile gametile;
 
