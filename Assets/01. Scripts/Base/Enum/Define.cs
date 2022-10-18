@@ -35,7 +35,9 @@ public class Define
     public enum TileState
     {
         LIVE,
-        DIE
+        DEAD,
+        SELECT,
+        MOVE,
     }
 
     public enum TileType
