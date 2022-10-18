@@ -24,14 +24,6 @@ public class Map
     }
 
 
-    public void CeateGameScene()
-    {
-
-    }
-    public void CreateGameAction()
-    {
-
-    }
     public void InitTile()
     {
         int coinXPos = 0;
