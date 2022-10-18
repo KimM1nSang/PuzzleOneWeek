@@ -5,8 +5,8 @@ using UnityEngine.EventSystems;
 
 public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
-    [field:SerializeField] public Define.TileState TileState { get; private set; }
-    [field:SerializeField] public Define.TileType TileType { get; private set; }
+    [field:SerializeField] public Define.TileState TileState { get; set; }
+    [field:SerializeField] public Define.TileType TileType { get; set; }
 
     public void InitTile(Define.TileState state, Define.TileType type)
     {
@@ -24,7 +24,6 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IP
     public void OnPointerEnter(PointerEventData eventData)
     {
         Debug.Log("타일에 마우스를 댐");
-
         TouchManager.Instance.DragTile(this);
         GameManager.Instance.map.GetTile(1);
     }

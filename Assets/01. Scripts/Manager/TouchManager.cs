@@ -29,9 +29,8 @@ public class TouchManager : Singleton<TouchManager>
     public void StartDragTile(Tile tile)
     {
         isTouch = true;
-        currentTouchTile = tile;
-        currentTouchTile.GetComponent<SpriteRenderer>().color = Color.red;
-        AddLine(currentTouchTile);
+        Debug.Log("타일 연결 시작");
+        AddLinkTile(tile);
     }
 
     public void DragTile(Tile tile) // 타일 하나 누른후 드래그했을때
@@ -42,21 +41,34 @@ public class TouchManager : Singleton<TouchManager>
 
         bool isNear = Vector3.Distance(currentTouchTile.transform.position, tile.transform.position) <= 1f; // 거리가 좁다면
         bool isSame = currentTouchTile.TileType == tile.TileType; // 색이 같다면
-        bool isNotContain = linkTileList.Contains(tile) == false; // 아직 연결시키지 않았다면
+        bool isNotContain = tile.TileState != Define.TileState.SELECT; // 아직 연결시키지 않았다면
 
         if (isNear && isSame && isNotContain) // 되는놈
         {
             Debug.Log("타일 연결");
-            
-            currentTouchTile = tile;
-            currentTouchTile.GetComponent<SpriteRenderer>().color = Color.red;
-            AddLine(currentTouchTile);
+            AddLinkTile(tile);
         }
+    }
+
+    private void AddLinkTile(Tile tile)
+    {
+        // 타일 링크 표시 on
+        tile.TileState = Define.TileState.SELECT;
+        tile.GetComponent<SpriteRenderer>().color = Color.red;
+        AddLine(tile);
+
+        // 상호작용하는 타일을 이걸로 바꾸기
+        currentTouchTile = tile;
     }
 
     public void DropTile()
     {
         // 삭제 빔
+        foreach (var tile in linkTileList)
+        {
+            tile.TileState = Define.TileState.SELECT;
+        }
+
         GameManager.Instance.map.ClearSelectTile(linkTileList);
 
         // 초기화
