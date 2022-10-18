@@ -15,7 +15,7 @@ public class GameManager : Singleton<GameManager>
 
     public void InitGame()
     {
-        Global.Pool.CreatePool<Tile>(TilePrefab, TileParent, (int)(map.ScreenSize.x * map.ScreenSize.y));
+        Global.Pool.CreatePool<Tile>(TilePrefab, TileParent, (int)(map.MapSize.x * map.MapSize.y));
         map.InitMap();
     }
 }
