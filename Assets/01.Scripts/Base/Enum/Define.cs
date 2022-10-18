@@ -32,11 +32,14 @@ public class Define
     }
     #endregion
 
-    public enum ItemSlot
+    public enum TileState
     {
-        HEAD,
-        ARM,
-        LEG,
-        MAXCOUNT
+        LIVE,
+        DIE
+    }
+
+    public enum TileType
+    {
+        BLUE
     }
 }
