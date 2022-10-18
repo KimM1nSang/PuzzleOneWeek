@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class Map : Singleton<Map>
+public class Map
 {
     public Vector2 ScreenSize
     {
@@ -12,16 +12,15 @@ public class Map : Singleton<Map>
             return new Vector2(7, 6);
         }
     }
-    
+
     Action _onEnemyMove;
     Action _onTreeMove;
 
-    private Tile[] gametiles;
+    private List<Tile> gametiles = new List<Tile>();
 
-
-    public bool InitMap()
+    public void InitMap()
     {
-        return true;
+        InitTile();
     }
 
 
@@ -37,15 +36,15 @@ public class Map : Singleton<Map>
     {
         int coinXPos = 0;
         int coinYPos = 0;
-        int diffX = 104;
-        int diffY = 120;
-        int initCoinXPos = 72;
-        int initCoinYPos = 778;
+        int diffX = 0/*104*/;
+        int diffY = 0/*120*/;
+        int initCoinXPos = 0/*72*/;
+        int initCoinYPos = 0/*778*/;
 
         Tile gametile;
 
         // init array
-        gametiles = new Tile[(int)(ScreenSize.x * ScreenSize.y)];
+        gametiles = new List<Tile>();
 
         // init tile
         for (int xIndex = 0; xIndex < ScreenSize.x; xIndex++)
@@ -59,14 +58,17 @@ public class Map : Singleton<Map>
             {
                 gametile = CreateTile(new Vector2(coinXPos, coinYPos), Define.TileType.BLUE, Define.TileState.LIVE);
 
-                gametiles[1] = gametile;
+                gametiles.Add(gametile);
 
                 coinYPos -= diffY;
             }
         }
     }
-    public Tile CreateTile(Vector2 pos,  Define.TileType type, Define.TileState state)
+    public Tile CreateTile(Vector2 pos, Define.TileType type, Define.TileState state)
     {
-        return new Tile();
+        Tile tile = Global.Pool.GetItem<Tile>();
+        tile.InitTile(state, type);
+        tile.transform.position = pos;
+        return tile;
     }
 }
