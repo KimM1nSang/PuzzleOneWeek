@@ -115,4 +115,9 @@ public class Map
         tile.transform.position = pos;
         return tile;
     }
+
+    public Tile GetTile(int index)
+    {
+        return gametiles[index];
+    }
 }

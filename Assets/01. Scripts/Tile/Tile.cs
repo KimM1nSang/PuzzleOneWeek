@@ -16,21 +16,27 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IP
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        throw new System.NotImplementedException();
+        Debug.Log("타일 클릭");
+
+        TouchManager.Instance.StartDragTile(this);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
         Debug.Log("타일에 마우스를 댐");
+
+        TouchManager.Instance.DragTile(this);
+        GameManager.Instance.map.GetTile(1);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        Debug.Log("타일에서 마우스를 뗌");
+        Debug.Log("타일에서 마우스가 벗어남");
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        Debug.Log("타일을 클릭함");
+        Debug.Log("타일 클릭 끝");
+        //TouchManager.Instance.DropTile();
     }
 }
