@@ -5,17 +5,21 @@ using System.Linq;
 
 public class TouchManager : Singleton<TouchManager>
 {
-    [HideInInspector] public Tile currentTouchTile; // 현재 상호작용 중인 타일
-    //[HideInInspector] public Tile dragTile; // 드래그한 타일
+    [HideInInspector] public Tile currentTouchTile;
+    [HideInInspector] public Tile lastTouchTile;
 
-    public LineRenderer touchingLine;
+    [SerializeField] GameObject linkEffect;
+    [SerializeField] LineRenderer touchingLine;
 
     private bool isTouch;
     private List<Tile> linkTileList = new List<Tile>();
+    private List<TileLinkEffect> linkEffectList = new List<TileLinkEffect>();
+
+    //private Stack<Tile> linkTileStack = new Stack<Tile>();
 
     void Start()
     {
-        
+        Global.Pool.CreatePool<TileLinkEffect>(linkEffect, transform);
     }
 
     void Update()
@@ -26,52 +30,67 @@ public class TouchManager : Singleton<TouchManager>
         }
     }
 
-    public void StartDragTile(Tile tile)
+    public void StartTile(Tile tile) // 처음 타일을 눌렀다
     {
         isTouch = true;
-        Debug.Log("타일 연결 시작");
         AddLinkTile(tile);
     }
 
-    public void DragTile(Tile tile) // 타일 하나 누른후 드래그했을때
+    public void EnterTile(Tile tile) // 타일 누름
     {
         if (isTouch == false) return;
 
-        // currentTile과 검사
 
-        bool isNear = Vector3.Distance(currentTouchTile.transform.position, tile.transform.position) <= 1f; // 거리가 좁다면
-        bool isSame = currentTouchTile.TileType == tile.TileType; // 색이 같다면
-        bool isNotContain = tile.TileState != Define.TileState.SELECT; // 아직 연결시키지 않았다면
+        bool isNear = Vector3.Distance(currentTouchTile.transform.position, tile.transform.position) <= 1f;
+        bool isSame = currentTouchTile.TileType == tile.TileType;
+        bool isNotContain = tile.TileState != Define.TileState.SELECT;
 
-        if (isNear && isSame && isNotContain) // 되는놈
+        if (isNear && isSame)
         {
-            Debug.Log("타일 연결");
-            AddLinkTile(tile);
+            if(lastTouchTile == tile)
+            {
+                // 이전으로 돌아가기
+                currentTouchTile.TileState = Define.TileState.LIVE;
+                linkTileList.Remove(currentTouchTile);
+                RemoveLine();
+                lastTouchTile = linkTileList[linkTileList.Count - 2];
+                currentTouchTile = tile;
+
+                return;
+            }
+
+            if (isNotContain)
+            {
+                lastTouchTile = currentTouchTile;
+                AddLinkTile(tile);
+            }
         }
     }
 
     private void AddLinkTile(Tile tile)
     {
-        // 타일 링크 표시 on
+        var linkEffect = Global.Pool.GetItem<TileLinkEffect>(); // 일단 이펙트 생성만 함
+        linkEffect.transform.SetParent(tile.transform);
+        linkEffect.transform.position = tile.transform.position;
+
+        linkEffectList.Add(linkEffect);
+
         tile.TileState = Define.TileState.SELECT;
-        tile.GetComponent<SpriteRenderer>().color = Color.red;
         AddLine(tile);
 
-        // 상호작용하는 타일을 이걸로 바꾸기
         currentTouchTile = tile;
     }
 
     public void DropTile()
     {
-        // 삭제 빔
-        foreach (var tile in linkTileList)
+        foreach (var effect in linkEffectList)
         {
-            tile.TileState = Define.TileState.SELECT;
+            effect.gameObject.SetActive(false);
         }
+        linkEffectList.Clear();
 
         GameManager.Instance.map.ClearSelectTile(linkTileList);
 
-        // 초기화
         isTouch = false;
         currentTouchTile = null;
         linkTileList.Clear();
@@ -80,11 +99,21 @@ public class TouchManager : Singleton<TouchManager>
 
     public void AddLine(Tile tile)
     {
-        linkTileList.Add(tile); // 타일추가
+        linkTileList.Add(tile);
 
-        var linkTilePosList = from linkTile in linkTileList select linkTile.transform.position; // 연결된 타일들의 위치
+        var linkTilePosList = from linkTile in linkTileList select linkTile.transform.position;
 
         touchingLine.positionCount = linkTilePosList.Count();
-        touchingLine.SetPositions(linkTilePosList.ToArray()); // 타일들의 위치를 통해 라인 생성
+        touchingLine.SetPositions(linkTilePosList.ToArray());
+    }
+
+    public void RemoveLine()
+    {
+        linkEffectList.RemoveAt(linkEffectList.Count - 1);
+
+        var linkTilePosList = from linkTile in linkTileList select linkTile.transform.position;
+
+        touchingLine.positionCount = linkTilePosList.Count();
+        touchingLine.SetPositions(linkTilePosList.ToArray());
     }
 }
