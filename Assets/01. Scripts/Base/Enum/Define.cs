@@ -43,6 +43,8 @@ public class Define
     public enum TileType
     {
         TypeA,
+        TypeB,
+        TypeC,
     }
     public static T RandomEnum<T>()
     { 
