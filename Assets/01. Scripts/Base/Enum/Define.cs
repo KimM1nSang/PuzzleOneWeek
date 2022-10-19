@@ -45,6 +45,7 @@ public class Define
         TypeA,
         TypeB,
         TypeC,
+        TypeD,
     }
     public static T RandomEnum<T>()
     { 

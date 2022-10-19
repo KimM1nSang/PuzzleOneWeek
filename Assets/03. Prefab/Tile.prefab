@@ -96,6 +96,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 548ea11a3c5986e48af873f147f95dd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tileTypeSprites:
+  - {fileID: 21300000, guid: f24a301f5c6d7654ebc1de37b885201e, type: 3}
+  - {fileID: 21300000, guid: 04da6e3d8e4e13b4eb922e7a910a5478, type: 3}
+  - {fileID: 21300000, guid: ab42beb6079b40b43b2a44efecaa4a69, type: 3}
+  - {fileID: 21300000, guid: f00d422b5ed7e4c41a1f61e211cf914a, type: 3}
   <TileType>k__BackingField: 0
 --- !u!61 &26068811874379405
 BoxCollider2D:

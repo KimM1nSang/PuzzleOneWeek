@@ -7,6 +7,7 @@ public class TouchManager : Singleton<TouchManager>
 {
     [HideInInspector] public Tile currentTouchTile;
     [HideInInspector] public Tile lastTouchTile;
+    [HideInInspector] public Tile firstTouchTile;
 
     [SerializeField] GameObject linkEffect;
     [SerializeField] LineRenderer touchingLine;
@@ -15,7 +16,7 @@ public class TouchManager : Singleton<TouchManager>
     private List<Tile> linkTileList = new List<Tile>();
     private List<TileLinkEffect> linkEffectList = new List<TileLinkEffect>();
 
-    //private Stack<Tile> linkTileStack = new Stack<Tile>();
+    private Stack<Tile> linkTileStack = new Stack<Tile>();
 
     void Start()
     {
@@ -33,15 +34,20 @@ public class TouchManager : Singleton<TouchManager>
     public void StartTile(Tile tile) // 처음 타일을 눌렀다
     {
         isTouch = true;
+        firstTouchTile = tile;
         AddLinkTile(tile);
     }
 
     public void EnterTile(Tile tile) // 타일에 마우스를 댐
     {
         if (isTouch == false) return;
+        //if (tile == firstTouchTile) return;
+
 
         if (lastTouchTile == tile) // 바로 이전 타일이라면
         {
+            if (linkTileList.Count <= 1) return;
+
             // 이전으로 돌아가기
             currentTouchTile.TileState = Define.TileState.LIVE;
             linkTileList.Remove(currentTouchTile);
@@ -66,15 +72,10 @@ public class TouchManager : Singleton<TouchManager>
         bool isSame = currentTouchTile.TileType == tile.TileType;
         bool isNotContain = tile.TileState != Define.TileState.SELECT;
 
-        if (isNear && isSame)
+        if (isNear && isSame && isNotContain)
         {
-            
-
-            if (isNotContain)
-            {
                 lastTouchTile = currentTouchTile;
                 AddLinkTile(tile);
-            }
         }
     }
 
@@ -104,6 +105,8 @@ public class TouchManager : Singleton<TouchManager>
 
         isTouch = false;
         currentTouchTile = null;
+        firstTouchTile = null;
+        lastTouchTile = null;
         linkTileList.Clear();
         touchingLine.positionCount = 0;
     }
@@ -120,6 +123,7 @@ public class TouchManager : Singleton<TouchManager>
 
     public void RemoveLine()
     {
+        linkEffectList[linkEffectList.Count - 1].gameObject.SetActive(false);
         linkEffectList.RemoveAt(linkEffectList.Count - 1);
 
         var linkTilePosList = from linkTile in linkTileList select linkTile.transform.position;
