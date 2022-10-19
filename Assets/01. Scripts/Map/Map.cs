@@ -49,7 +49,7 @@ public class Map
 
             for (int yIndex = 0; yIndex < MapSize.y; yIndex++)
             {
-                gametile = CreateTile(new Vector2(coinXPos, coinYPos), Define.TileType.BLUE, Define.TileState.LIVE);
+                gametile = CreateTile(new Vector2(coinXPos, coinYPos), Define.RandomEnum<Define.TileType>(), Define.TileState.LIVE);
 
                 gametiles.Add(gametile);
 
@@ -130,7 +130,7 @@ public class Map
     public void SetNewTile(Tile tile)
     {
         tile.gameObject.SetActive(true);
-        tile.InitTile(Define.TileState.LIVE,Define.TileType.BLUE);
+        tile.InitTile(Define.TileState.LIVE, Define.RandomEnum<Define.TileType>());
     }
     public void AddNewTileAction()
     {

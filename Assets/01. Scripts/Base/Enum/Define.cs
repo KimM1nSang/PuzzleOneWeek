@@ -42,6 +42,12 @@ public class Define
 
     public enum TileType
     {
-        BLUE
+        TypeA,
     }
+    public static T RandomEnum<T>()
+    { 
+        Array values = Enum.GetValues(typeof(T));
+        return (T)values.GetValue(UnityEngine.Random.Range(0, values.Length)); 
+    }
+
 }
