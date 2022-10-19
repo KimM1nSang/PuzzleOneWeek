@@ -5,8 +5,8 @@ using System.Linq;
 
 public class TouchManager : Singleton<TouchManager>
 {
-    [HideInInspector] public Tile currentTouchTile; // ÇöÀç »óÈ£ÀÛ¿ë ÁßÀÎ Å¸ÀÏ
-    //[HideInInspector] public Tile dragTile; // µå·¡±×ÇÑ Å¸ÀÏ
+    [HideInInspector] public Tile currentTouchTile; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È£ï¿½Û¿ï¿½ ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½
+    //[HideInInspector] public Tile dragTile; // ï¿½å·¡ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½
 
     public LineRenderer touchingLine;
 
@@ -29,41 +29,41 @@ public class TouchManager : Singleton<TouchManager>
     public void StartDragTile(Tile tile)
     {
         isTouch = true;
-        Debug.Log("Å¸ÀÏ ¿¬°á ½ÃÀÛ");
+        Debug.Log("Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
         AddLinkTile(tile);
     }
 
-    public void DragTile(Tile tile) // Å¸ÀÏ ÇÏ³ª ´©¸¥ÈÄ µå·¡±×ÇßÀ»¶§
+    public void DragTile(Tile tile) // Å¸ï¿½ï¿½ ï¿½Ï³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½å·¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     {
         if (isTouch == false) return;
 
-        // currentTile°ú °Ë»ç
+        // currentTileï¿½ï¿½ ï¿½Ë»ï¿½
 
-        bool isNear = Vector3.Distance(currentTouchTile.transform.position, tile.transform.position) <= 1f; // °Å¸®°¡ Á¼´Ù¸é
-        bool isSame = currentTouchTile.TileType == tile.TileType; // »öÀÌ °°´Ù¸é
-        bool isNotContain = tile.TileState != Define.TileState.SELECT; // ¾ÆÁ÷ ¿¬°á½ÃÅ°Áö ¾Ê¾Ò´Ù¸é
+        bool isNear = Vector3.Distance(currentTouchTile.transform.position, tile.transform.position) <= 1f; // ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½
+        bool isSame = currentTouchTile.TileType == tile.TileType; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½
+        bool isNotContain = tile.TileState != Define.TileState.SELECT; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Å°ï¿½ï¿½ ï¿½Ê¾Ò´Ù¸ï¿½
 
-        if (isNear && isSame && isNotContain) // µÇ´Â³ð
+        if (isNear && isSame && isNotContain) // ï¿½Ç´Â³ï¿½
         {
-            Debug.Log("Å¸ÀÏ ¿¬°á");
+            Debug.Log("Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
             AddLinkTile(tile);
         }
     }
 
     private void AddLinkTile(Tile tile)
     {
-        // Å¸ÀÏ ¸µÅ© Ç¥½Ã on
+        // Å¸ï¿½ï¿½ ï¿½ï¿½Å© Ç¥ï¿½ï¿½ on
         tile.TileState = Define.TileState.SELECT;
         tile.GetComponent<SpriteRenderer>().color = Color.red;
         AddLine(tile);
 
-        // »óÈ£ÀÛ¿ëÇÏ´Â Å¸ÀÏÀ» ÀÌ°É·Î ¹Ù²Ù±â
+        // ï¿½ï¿½È£ï¿½Û¿ï¿½ï¿½Ï´ï¿½ Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½Ì°É·ï¿½ ï¿½Ù²Ù±ï¿½
         currentTouchTile = tile;
     }
 
     public void DropTile()
     {
-        // »èÁ¦ ºö
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
         foreach (var tile in linkTileList)
         {
             tile.TileState = Define.TileState.SELECT;
@@ -71,7 +71,7 @@ public class TouchManager : Singleton<TouchManager>
 
         GameManager.Instance.map.ClearSelectTile(linkTileList);
 
-        // ÃÊ±âÈ­
+        // ï¿½Ê±ï¿½È­
         isTouch = false;
         currentTouchTile = null;
         linkTileList.Clear();
@@ -80,11 +80,11 @@ public class TouchManager : Singleton<TouchManager>
 
     public void AddLine(Tile tile)
     {
-        linkTileList.Add(tile); // Å¸ÀÏÃß°¡
+        linkTileList.Add(tile); // Å¸ï¿½ï¿½ï¿½ß°ï¿½
 
-        var linkTilePosList = from linkTile in linkTileList select linkTile.transform.position; // ¿¬°áµÈ Å¸ÀÏµéÀÇ À§Ä¡
+        var linkTilePosList = from linkTile in linkTileList select linkTile.transform.position; // ï¿½ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½Ïµï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡
 
         touchingLine.positionCount = linkTilePosList.Count();
-        touchingLine.SetPositions(linkTilePosList.ToArray()); // Å¸ÀÏµéÀÇ À§Ä¡¸¦ ÅëÇØ ¶óÀÎ »ý¼º
+        touchingLine.SetPositions(linkTilePosList.ToArray()); // Å¸ï¿½Ïµï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     }
 }

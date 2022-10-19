@@ -16,26 +16,27 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IP
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        Debug.Log("Å¸ÀÏ Å¬¸¯");
+        Debug.Log("Å¸ï¿½ï¿½ Å¬ï¿½ï¿½");
 
         TouchManager.Instance.StartDragTile(this);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log("Å¸ÀÏ¿¡ ¸¶¿ì½º¸¦ ´ï");
+        Debug.Log("Å¸ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ì½ºï¿½ï¿½ ï¿½ï¿½");
+
         TouchManager.Instance.DragTile(this);
         GameManager.Instance.map.GetTile(1);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        Debug.Log("Å¸ÀÏ¿¡¼­ ¸¶¿ì½º°¡ ¹þ¾î³²");
+        Debug.Log("Å¸ï¿½Ï¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ì½ºï¿½ï¿½ ï¿½ï¿½ï¿½î³²");
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        Debug.Log("Å¸ÀÏ Å¬¸¯ ³¡");
+        Debug.Log("Å¸ï¿½ï¿½ Å¬ï¿½ï¿½ ï¿½ï¿½");
         //TouchManager.Instance.DropTile();
     }
 }
