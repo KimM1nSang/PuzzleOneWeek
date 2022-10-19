@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-
+using DG.Tweening;
 public class Map
 {
     public Vector2 MapSize
@@ -98,7 +98,9 @@ public class Map
                 }
 
                 if (deadTileNum > 0)
+                {
                     ChangeTile(y, y + deadTileNum);
+                }
             }
         }
         AddTile();
@@ -124,7 +126,7 @@ public class Map
                 SetNewTile(tile);
             }
         }
-
+        AddNewTileAction();
     }
     public void SetNewTile(Tile tile)
     {
@@ -149,7 +151,7 @@ public class Map
                     pos = tile.transform.position;
                     tile.transform.position = new Vector2(pos.x, pos.y + (lineDeadTiles[i] * diffY));
 
-                    //moveCoin(tile, pos);
+                    MoveTile(tile, pos);
                 }
             }
         }
@@ -161,13 +163,24 @@ public class Map
         Tile tile1 = gametiles[idx1];
         Tile tile2 = gametiles[idx2];
         tempPos = tile2.transform.position;
-        tile2.transform.position = tile1.transform.position;
-        tile1.transform.position = tempPos;
-
+        tile2.transform.position = tile1.transform.position ;
+        /* 
+            tile1.transform.position = tempPos;
+    */
+        MoveTile(tile1,tempPos);
         tempTile = tile2;
         gametiles[idx2] = tile1;
         gametiles[idx1] = tempTile;
-
+        
+    }
+    private void MoveTile(Tile tile,Vector2 pos)
+    {
+        float duration = .5f;
+        tile.InitTile(Define.TileState.MOVE, tile.TileType);
+        DOTween.Kill(tile);
+        tile.transform.DOMove(pos,duration).SetDelay(.5f).OnComplete(()=> {
+            tile.InitTile(Define.TileState.LIVE, tile.TileType);
+        });
     }
 
     public Tile CreateTile(Vector2 pos, Define.TileType type, Define.TileState state)
