@@ -13,11 +13,16 @@ public class Map
         }
     }
 
+    private float diffX = .7f;
+    private float diffY = .7f;
+    private float initCoinXPos = -2.1f;
+    private float initCoinYPos = 1;
+
     Action _onEnemyMove;
     Action _onTreeMove;
 
     private List<Tile> gametiles = new List<Tile>();
-
+    private List<int> lineDeadTiles = new List<int>();
     public void InitMap()
     {
         InitTile();
@@ -28,10 +33,7 @@ public class Map
     {
         float coinXPos = 0;
         float coinYPos = 0;
-        float diffX = .7f;
-        float diffY = .7f;
-        float initCoinXPos = -2.1f;
-        float initCoinYPos = 1;
+    
 
         Tile gametile;
 
@@ -58,13 +60,21 @@ public class Map
     }
     public void ClearSelectTile(List<Tile> tiles)
     {
-        if (tiles.Count > 3)
+        if (tiles.Count >= 3)
         {
             foreach (var item in tiles)
             {
                 item.InitTile(Define.TileState.DEAD,item.TileType);
+                item.gameObject.SetActive(false);
             }
         }
+        else
+        {
+            foreach (var item in tiles)
+            {
+                item.InitTile(Define.TileState.LIVE,item.TileType);
+            }
+        }    
         MoveUpDeadTile();
     }
     public void MoveUpDeadTile()
@@ -89,6 +99,58 @@ public class Map
 
                 if (deadTileNum > 0)
                     ChangeTile(y, y + deadTileNum);
+            }
+        }
+        AddTile();
+    }
+    public void AddTile()
+    {
+        Tile tile;
+        int line = 0;
+        lineDeadTiles.Clear();
+
+        for (int i = 0; i < MapSize.x; i++)
+            lineDeadTiles.Add(0);
+
+        for (int i = 0; i < gametiles.Count; i++)
+        {
+            tile = gametiles[i];
+
+            if (tile.TileState ==Define.TileState.DEAD)
+            {
+                line = (int)(i / MapSize.y);
+                lineDeadTiles[line] += 1;
+
+                SetNewTile(tile);
+            }
+        }
+
+    }
+    public void SetNewTile(Tile tile)
+    {
+        tile.gameObject.SetActive(true);
+        tile.InitTile(Define.TileState.LIVE,Define.TileType.BLUE);
+    }
+    public void AddNewTileAction()
+    {
+        Tile tile;
+        Vector2 pos;
+        int startIndex;
+
+        for (int i = 0; i < MapSize.x; i++)
+        {
+            if (lineDeadTiles[i] > 0)
+            {
+                startIndex = i * (int)MapSize.y;
+
+                for (int j = startIndex; j < startIndex + lineDeadTiles[i]; j++)
+                {
+                    tile = gametiles[j];
+                    pos = tile.transform.position;
+                    tile.transform.position = new Vector2(pos.x, pos.y + (lineDeadTiles[i] * diffY));
+
+                    //moveCoin(tile, pos);
+                }
             }
         }
     }
