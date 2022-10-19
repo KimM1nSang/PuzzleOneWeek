@@ -36,10 +36,31 @@ public class TouchManager : Singleton<TouchManager>
         AddLinkTile(tile);
     }
 
-    public void EnterTile(Tile tile) // 타일 누름
+    public void EnterTile(Tile tile) // 타일에 마우스를 댐
     {
         if (isTouch == false) return;
 
+        if (lastTouchTile == tile) // 바로 이전 타일이라면
+        {
+            // 이전으로 돌아가기
+            currentTouchTile.TileState = Define.TileState.LIVE;
+            linkTileList.Remove(currentTouchTile);
+            RemoveLine();
+
+            // 사실 이렇게 안하고 Stack 쓰면되서 나중에 수정하도록하겠습니다..
+
+            if (linkTileList.Count > 2) // 3개까지는 타일-이전타일-현재타일이 되는데 2개에서 이전타일-현재타일일때 현재타일을 지우면 이전타일이 없어서 에러남
+            {
+                lastTouchTile = linkTileList[linkTileList.Count - 2];
+            }
+            else // 2개에서 하나 지워지고 처음 클릭한 타일만 남았다면 처음 타일을 마지막클릭한걸로 바꾸기
+            {
+                lastTouchTile = linkTileList[0];
+            }
+            currentTouchTile = tile;
+
+            return;
+        }
 
         bool isNear = Vector3.Distance(currentTouchTile.transform.position, tile.transform.position) <= 1f;
         bool isSame = currentTouchTile.TileType == tile.TileType;
@@ -47,17 +68,7 @@ public class TouchManager : Singleton<TouchManager>
 
         if (isNear && isSame)
         {
-            if(lastTouchTile == tile)
-            {
-                // 이전으로 돌아가기
-                currentTouchTile.TileState = Define.TileState.LIVE;
-                linkTileList.Remove(currentTouchTile);
-                RemoveLine();
-                lastTouchTile = linkTileList[linkTileList.Count - 2];
-                currentTouchTile = tile;
-
-                return;
-            }
+            
 
             if (isNotContain)
             {
