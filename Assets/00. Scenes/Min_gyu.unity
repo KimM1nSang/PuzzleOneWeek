@@ -344,6 +344,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isDontDestroyOnLoad: 1
   currentTouchTile: {fileID: 0}
+  lastTouchTile: {fileID: 0}
   linkEffect: {fileID: 8589372214292881129, guid: 8baf428d001775b418eed65fda66d711, type: 3}
   touchingLine: {fileID: 1828329965}
 --- !u!1 &1828329963

@@ -18,8 +18,7 @@ public class Map
     private float initCoinXPos = -2.1f;
     private float initCoinYPos = 1;
 
-    Action _onEnemyMove;
-    Action _onTreeMove;
+    Action OnTileMoveEnd;
 
     private List<Tile> gametiles = new List<Tile>();
     private List<int> lineDeadTiles = new List<int>();
@@ -180,6 +179,7 @@ public class Map
         DOTween.Kill(tile);
         tile.transform.DOMove(pos,duration).SetDelay(.5f).OnComplete(()=> {
             tile.InitTile(Define.TileState.LIVE, tile.TileType);
+            OnTileMoveEnd?.Invoke();
         });
     }
 
