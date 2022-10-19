@@ -5,17 +5,21 @@ using System.Linq;
 
 public class TouchManager : Singleton<TouchManager>
 {
-    [HideInInspector] public Tile currentTouchTile; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È£ï¿½Û¿ï¿½ ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½
-    //[HideInInspector] public Tile dragTile; // ï¿½å·¡ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½
+    [HideInInspector] public Tile currentTouchTile;
+    [HideInInspector] public Tile lastTouchTile;
 
-    public LineRenderer touchingLine;
+    [SerializeField] GameObject linkEffect;
+    [SerializeField] LineRenderer touchingLine;
 
     private bool isTouch;
     private List<Tile> linkTileList = new List<Tile>();
+    private List<TileLinkEffect> linkEffectList = new List<TileLinkEffect>();
+
+    //private Stack<Tile> linkTileStack = new Stack<Tile>();
 
     void Start()
     {
-        
+        Global.Pool.CreatePool<TileLinkEffect>(linkEffect, transform);
     }
 
     void Update()
@@ -26,52 +30,67 @@ public class TouchManager : Singleton<TouchManager>
         }
     }
 
-    public void StartDragTile(Tile tile)
+    public void StartTile(Tile tile) // Ã³À½ Å¸ÀÏÀ» ´­·¶´Ù
     {
         isTouch = true;
-        Debug.Log("Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
         AddLinkTile(tile);
     }
 
-    public void DragTile(Tile tile) // Å¸ï¿½ï¿½ ï¿½Ï³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½å·¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    public void EnterTile(Tile tile) // Å¸ÀÏ ´©¸§
     {
         if (isTouch == false) return;
 
-        // currentTileï¿½ï¿½ ï¿½Ë»ï¿½
 
-        bool isNear = Vector3.Distance(currentTouchTile.transform.position, tile.transform.position) <= 1f; // ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½
-        bool isSame = currentTouchTile.TileType == tile.TileType; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½
-        bool isNotContain = tile.TileState != Define.TileState.SELECT; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Å°ï¿½ï¿½ ï¿½Ê¾Ò´Ù¸ï¿½
+        bool isNear = Vector3.Distance(currentTouchTile.transform.position, tile.transform.position) <= 1f;
+        bool isSame = currentTouchTile.TileType == tile.TileType;
+        bool isNotContain = tile.TileState != Define.TileState.SELECT;
 
-        if (isNear && isSame && isNotContain) // ï¿½Ç´Â³ï¿½
+        if (isNear && isSame)
         {
-            Debug.Log("Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
-            AddLinkTile(tile);
+            if(lastTouchTile == tile)
+            {
+                // ÀÌÀüÀ¸·Î µ¹¾Æ°¡±â
+                currentTouchTile.TileState = Define.TileState.LIVE;
+                linkTileList.Remove(currentTouchTile);
+                RemoveLine();
+                lastTouchTile = linkTileList[linkTileList.Count - 2];
+                currentTouchTile = tile;
+
+                return;
+            }
+
+            if (isNotContain)
+            {
+                lastTouchTile = currentTouchTile;
+                AddLinkTile(tile);
+            }
         }
     }
 
     private void AddLinkTile(Tile tile)
     {
-        // Å¸ï¿½ï¿½ ï¿½ï¿½Å© Ç¥ï¿½ï¿½ on
+        var linkEffect = Global.Pool.GetItem<TileLinkEffect>(); // ÀÏ´Ü ÀÌÆåÆ® »ý¼º¸¸ ÇÔ
+        linkEffect.transform.SetParent(tile.transform);
+        linkEffect.transform.position = tile.transform.position;
+
+        linkEffectList.Add(linkEffect);
+
         tile.TileState = Define.TileState.SELECT;
-        tile.GetComponent<SpriteRenderer>().color = Color.red;
         AddLine(tile);
 
-        // ï¿½ï¿½È£ï¿½Û¿ï¿½ï¿½Ï´ï¿½ Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½Ì°É·ï¿½ ï¿½Ù²Ù±ï¿½
         currentTouchTile = tile;
     }
 
     public void DropTile()
     {
-        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
-        foreach (var tile in linkTileList)
+        foreach (var effect in linkEffectList)
         {
-            tile.TileState = Define.TileState.SELECT;
+            effect.gameObject.SetActive(false);
         }
+        linkEffectList.Clear();
 
         GameManager.Instance.map.ClearSelectTile(linkTileList);
 
-        // ï¿½Ê±ï¿½È­
         isTouch = false;
         currentTouchTile = null;
         linkTileList.Clear();
@@ -80,11 +99,21 @@ public class TouchManager : Singleton<TouchManager>
 
     public void AddLine(Tile tile)
     {
-        linkTileList.Add(tile); // Å¸ï¿½ï¿½ï¿½ß°ï¿½
+        linkTileList.Add(tile);
 
-        var linkTilePosList = from linkTile in linkTileList select linkTile.transform.position; // ï¿½ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½Ïµï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡
+        var linkTilePosList = from linkTile in linkTileList select linkTile.transform.position;
 
         touchingLine.positionCount = linkTilePosList.Count();
-        touchingLine.SetPositions(linkTilePosList.ToArray()); // Å¸ï¿½Ïµï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        touchingLine.SetPositions(linkTilePosList.ToArray());
+    }
+
+    public void RemoveLine()
+    {
+        linkEffectList.RemoveAt(linkEffectList.Count - 1);
+
+        var linkTilePosList = from linkTile in linkTileList select linkTile.transform.position;
+
+        touchingLine.positionCount = linkTilePosList.Count();
+        touchingLine.SetPositions(linkTilePosList.ToArray());
     }
 }
