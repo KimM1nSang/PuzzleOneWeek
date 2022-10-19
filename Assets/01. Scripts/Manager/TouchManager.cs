@@ -5,8 +5,8 @@ using System.Linq;
 
 public class TouchManager : Singleton<TouchManager>
 {
-    [HideInInspector] public Tile currentTouchTile;
-    [HideInInspector] public Tile lastTouchTile;
+    [HideInInspector] public Tile currentTile;
+    [HideInInspector] public Tile prevTile;
     [HideInInspector] public Tile firstTouchTile;
 
     [SerializeField] GameObject linkEffect;
@@ -27,7 +27,7 @@ public class TouchManager : Singleton<TouchManager>
     {
         if(Input.GetMouseButtonUp(0))
         {
-            DropTile();
+            MouseUpTile();
         }
     }
 
@@ -40,60 +40,69 @@ public class TouchManager : Singleton<TouchManager>
 
     public void EnterTile(Tile tile) // 타일에 마우스를 댐
     {
-        if (isTouch == false) return;
-        //if (tile == firstTouchTile) return;
+        if (isTouch == false) return; // 마우스 안대고 있었으면 x
 
-
-        if (lastTouchTile == tile) // 바로 이전 타일이라면
+        // 이전 타일에 닿았으면 Undo
+        if (prevTile == tile) // 바로 이전 타일이라면
         {
-            if (linkTileList.Count <= 1) return;
+            if (CanUndo() == false) return;
 
             // 이전으로 돌아가기
-            currentTouchTile.TileState = Define.TileState.LIVE;
-            linkTileList.Remove(currentTouchTile);
-            RemoveLine();
-
-            // 사실 이렇게 안하고 Stack 쓰면되서 나중에 수정하도록하겠습니다..
-
-            if (linkTileList.Count > 2) // 3개까지는 타일-이전타일-현재타일이 되는데 2개에서 이전타일-현재타일일때 현재타일을 지우면 이전타일이 없어서 에러남
-            {
-                lastTouchTile = linkTileList[linkTileList.Count - 2];
-            }
-            else // 2개에서 하나 지워지고 처음 클릭한 타일만 남았다면 처음 타일을 마지막클릭한걸로 바꾸기
-            {
-                lastTouchTile = linkTileList[0];
-            }
-            currentTouchTile = tile;
+            UndoTile();
+            currentTile = tile;
 
             return;
         }
 
-        bool isNear = Vector3.Distance(currentTouchTile.transform.position, tile.transform.position) <= 1f;
-        bool isSame = currentTouchTile.TileType == tile.TileType;
+        // 추가하기 위한 조건 검사
+        bool isNear = Vector3.Distance(currentTile.transform.position, tile.transform.position) <= 1f;
+        bool isSame = currentTile.TileType == tile.TileType;
         bool isNotContain = tile.TileState != Define.TileState.SELECT;
 
         if (isNear && isSame && isNotContain)
         {
-                lastTouchTile = currentTouchTile;
-                AddLinkTile(tile);
+            prevTile = currentTile;
+            AddLinkTile(tile); // 타일 추가
+        }
+    }
+
+    private bool CanUndo()
+    {
+        return (linkTileList.Count >= 2) == true; // 2개 이상이면 Undo 가능
+    }
+
+    private Tile GetPrevTile() // 되돌아갈 타일을 반환
+    {
+        if (CanUndo() == false) // 되돌아갈 수 없다면(타일이 1개 이하) null
+        {
+            return null;
+        }
+        else
+        {
+            return linkTileList[linkTileList.Count - 2]; // 뒤에서 2번째 타일(=Prev) 반환
         }
     }
 
     private void AddLinkTile(Tile tile)
     {
+        // Effect
         var linkEffect = Global.Pool.GetItem<TileLinkEffect>(); // 일단 이펙트 생성만 함
         linkEffect.transform.SetParent(tile.transform);
         linkEffect.transform.position = tile.transform.position;
-
         linkEffectList.Add(linkEffect);
 
+        // Tile
+        linkTileList.Add(tile);
         tile.TileState = Define.TileState.SELECT;
-        AddLine(tile);
+        currentTile = tile;
 
-        currentTouchTile = tile;
+        // Line
+        var linkTilePosList = from linkTile in linkTileList select linkTile.transform.position;
+        touchingLine.positionCount = linkTilePosList.Count();
+        touchingLine.SetPositions(linkTilePosList.ToArray());
     }
 
-    public void DropTile()
+    public void MouseUpTile() // 타일에서 마우스를 뗄 떄
     {
         foreach (var effect in linkEffectList)
         {
@@ -103,32 +112,31 @@ public class TouchManager : Singleton<TouchManager>
 
         GameManager.Instance.map.ClearSelectTile(linkTileList);
 
+        // init
         isTouch = false;
-        currentTouchTile = null;
+        currentTile = null;
         firstTouchTile = null;
-        lastTouchTile = null;
+        prevTile = null;
         linkTileList.Clear();
         touchingLine.positionCount = 0;
     }
 
-    public void AddLine(Tile tile)
+    public void UndoTile()
     {
-        linkTileList.Add(tile);
+        // Tile
+        currentTile.TileState = Define.TileState.LIVE;
+        linkTileList.Remove(currentTile);
 
-        var linkTilePosList = from linkTile in linkTileList select linkTile.transform.position;
-
-        touchingLine.positionCount = linkTilePosList.Count();
-        touchingLine.SetPositions(linkTilePosList.ToArray());
-    }
-
-    public void RemoveLine()
-    {
+        // Effect
         linkEffectList[linkEffectList.Count - 1].gameObject.SetActive(false);
         linkEffectList.RemoveAt(linkEffectList.Count - 1);
 
+        // Line
         var linkTilePosList = from linkTile in linkTileList select linkTile.transform.position;
-
         touchingLine.positionCount = linkTilePosList.Count();
         touchingLine.SetPositions(linkTilePosList.ToArray());
+
+        // Undo Tile Setting
+        prevTile = GetPrevTile();
     }
 }
